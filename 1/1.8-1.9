@@ -1,0 +1,105 @@
+import re
+from datetime import datetime
+import json
+class Patient:
+  def __init__(self, *args):
+    if len(args) == 1 and isinstance(args[0], str):
+        self.__init_from_string(args[0])
+    elif isinstance(args[0], dict):
+      self.__init_from_json(args[0])
+    else:
+      self.__set_field('name', args[0], self.__validate_name)
+      self.__set_field('date_of_birth', args[1], self.__validate_date_of_birth)
+      self.__set_field('phone_number', args[2], self.__validate_phone_number)
+      self.__set_field('email', args[3], self.__validate_email)
+      self.__address = args[4]
+
+  def __init_from_string(self, json_str):
+    data = json.loads(json_str)
+    self.__init_from_json(data)
+
+  def __init_from_json(self, data):
+    self.__set_field('name', data['name'], self.__validate_name)
+    self.__set_field('date_of_birth', data['date_of_birth'], self.__validate_date_of_birth)
+    self.__set_field('phone_number', data['phone_number'], self.__validate_phone_number)
+    self.__set_field('email', data['email'], self.__validate_email)
+    self.__address = data['address']
+
+  def __set_field(self, field_name, value, validation_func):
+      if not validation_func(value):
+          raise ValueError(f"Некорректное значение для {field_name}.")
+      setattr(self, f'_{self.__class__.__name__}__{field_name}', value)
+# Геттеры
+  def get_name(self):
+    return self.__name
+
+
+  def get_date_of_birth(self):
+    return self.__date_of_birth
+
+
+  def get_phone_number(self):
+    return self.__phone_number
+
+
+  def get_email(self):
+    return self.__email
+
+
+  def get_address(self):
+    return self.__address
+
+
+# Методы валидации
+  @staticmethod
+  def __validate_name(name):
+    if isinstance(name, str) and name.isalpha():
+        return True
+    raise ValueError("Некорректное ФИО.")
+
+
+  @staticmethod
+  def __validate_date_of_birth(date_of_birth):
+     try:
+        datetime.strptime(date_of_birth, '%Y-%m-%d')
+        return True
+     except ValueError:
+        raise ValueError("Дата рождения должна быть в формате ГГГГ-ММ-ДД.")
+
+
+  @staticmethod
+  def __validate_phone_number(phone_number):
+    pattern = r'^\+?\d{10,15}$'
+    if re.match(pattern, phone_number):
+        return True
+    raise ValueError("Некорректный номер телефона.")
+
+  @staticmethod
+  def __validate_email(email):
+    pattern_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+    if (re.fullmatch(pattern_email, email)):
+        return True
+    raise ValueError("Некорректный email.")
+
+
+# Вывод полной версии объекта
+  def __str__(self):
+    return f"Пациент: {self.__name} , Дата рождения: {self.__date_of_birth}, Телефон: {self.__phone_number}, Email:{self.__email}, Адрес: {self.__address}"
+
+# Вывод краткой версии объекта
+  def short_info(self):
+    return f"{self.__name}."
+
+
+# Перегрузка оператора сравнения
+  def __eq__(self, other):
+    if isinstance(other, Patient):
+        return self.__phone_number == other.get_phone_number()
+    return False
+
+# Пример создания объекта
+patient = Patient("Иван", "1990-01-01", "+79876543210", "my.ownsite@ourearth.org", "ул. Пушкина, д. Колотушкина")
+print(patient)
+class PatientShort(Patient):
+  def __str__(self):
+    return f"{self.get_name()}."
