@@ -1,7 +1,6 @@
 class Patient:
   def __init__(self, name, surname, date_of_birth, phone_number, address):
     self.__set_field('name', name, self.__validate_name)
-    self.__set_field('surname', surname, self.__validate_name)
     self.__set_field('date_of_birth', date_of_birth, self.__validate_date_of_birth)
     self.__set_field('phone_number', phone_number, self.__validate_phone_number)
     self.__address = address
