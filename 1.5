@@ -1,10 +1,12 @@
+  
 class Patient:
-  def __init__(self, name, surname, date_of_birth, phone_number, address):
+    def __init__(self, name, date_of_birth, phone_number, email, address):
     self.__set_field('name', name, self.__validate_name)
     self.__set_field('date_of_birth', date_of_birth, self.__validate_date_of_birth)
     self.__set_field('phone_number', phone_number, self.__validate_phone_number)
+    self.__set_field('email', email, self.__validate_email)
     self.__address = address
-
+        
   def __set_field(self, field_name, value, validation_func):
     if validation_func(value):
       setattr(self, f'_{self.__class__.__name__}__{field_name}', value)
