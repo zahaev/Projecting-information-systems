@@ -1,0 +1,27 @@
+import re
+from datetime import datetime
+import json
+class Patient:
+  def __init__(self, *args):
+    if len(args) == 1 and isinstance(args[0], str):
+      self.__init_from_string(args[0])
+    elif isinstance(args[0], dict):
+      self.__init_from_json(args[0])
+    else:
+      self.__set_field('name', args[0], self.__validate_name)
+      self.__set_field('date_of_birth', args[1], self.__validate_date_of_birth)
+      self.__set_field('phone_number', args[2], self.__validate_phone_number)
+       self.__set_field('email', args[3], self.__validate_email)
+      self.__address = args[4]
+
+  def __init_from_string(self, json_str):
+    data = json.loads(json_str)
+    self.__init_from_json(data)
+
+  def __init_from_json(self, data):
+    self.__set_field('name', data['name'], self.__validate_name)
+    self.__set_field('date_of_birth', data['date_of_birth'], self.__validate_date_of_birth)
+    self.__set_field('phone_number', data['phone_number'], self.__validate_phone_number)
+    self.__set_field('email', data['email'], self.__validate_email)
+    self.__address = data['address']
+
