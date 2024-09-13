@@ -1,0 +1,114 @@
+import re
+from datetime import datetime
+
+
+class Patient:
+    def __init__(self, name, date_of_birth, phone_number, email, address):
+        self.__set_name(name)
+        self.__set_date_of_birth(date_of_birth)
+        self.__set_phone_number(phone_number)
+        self.__set_email(email)
+        self.__set_address(address)
+
+
+# Инкапсуляция полей
+    def __set_name(self, name):
+        if self.__validate_name(name):
+            self.__name = name
+
+
+    def __set_date_of_birth(self, date_of_birth):
+        if self.__validate_date_of_birth(date_of_birth):
+            self.__date_of_birth = date_of_birth
+
+
+    def __set_phone_number(self, phone_number):
+        if self.__validate_phone_number(phone_number):
+            self.__phone_number = phone_number
+
+
+    def __set_email(self, email):
+        if self.__validate_name(email):
+            self.__email = email
+
+
+    def __set_address(self, address):
+        self.__address = address
+
+
+# Геттеры
+    def get_name(self):
+        return self.__name
+
+
+    def get_date_of_birth(self):
+        return self.__date_of_birth
+
+
+    def get_phone_number(self):
+        return self.__phone_number
+
+
+    def get_email(self):
+        return self.__email
+
+
+    def get_address(self):
+        return self.__address
+
+
+# Методы валидации
+    @staticmethod
+    def __validate_name(name):
+        if isinstance(name, str) and name.isalpha():
+            return True
+        raise ValueError("Некорректное ФИО.")
+
+
+    @staticmethod
+    def __validate_email(email):
+        pattern_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+        if (re.fullmatch(pattern_email, email)):
+            return True
+
+        raise ValueError("Некорректный email.")
+
+
+    @staticmethod
+    def __validate_date_of_birth(date_of_birth):
+        try:
+            datetime.strptime(date_of_birth, '%Y-%m-%d')
+            return True
+        except ValueError:
+            raise ValueError("Дата рождения должна быть в формате ГГГГ-ММ-ДД.")
+
+
+    @staticmethod
+    def __validate_phone_number(phone_number):
+        pattern = r'^\+?\d{10,15}$'
+        if re.match(pattern, phone_number):
+            return True
+        raise ValueError("Некорректный номер телефона.")
+
+
+# Вывод полной версии объекта
+    def __str__(self):
+        return f"Пациент: {self.__name} , Дата рождения: {self.__date_of_birth}, Телефон: {self.__phone_number}, Email:{self.__email}, Адрес: {self.__address}"
+
+
+# Вывод краткой версии объекта
+    def short_info(self):
+        return f"{self.__name[0]}."
+
+
+# Перегрузка оператора сравнения
+    def __eq__(self, other):
+        if isinstance(other, Patient):
+            return self.__phone_number == other.get_phone_number()
+
+        return False
+
+# Пример создания объекта
+patient = Patient("Иван", "1990-01-01", "+79876543210", "my.ownsite@ourearth.org", "ул. Пушкина, д. Колотушкина")
+print(patient)
+print(patient.short_info())
