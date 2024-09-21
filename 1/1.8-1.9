@@ -51,12 +51,6 @@ class Patient:
   def get_address(self):
     return self.__address
 
- # Добавление обращения  
-  def add_appointment(self, appointment):  
-    if isinstance(appointment, Appointment):  
-      self.appointments.append(appointment)  
-    else:  
-      raise ValueError("Входные данные должны быть экземпляром класса Appointment.")  
 
   # Список обращений  
     def display_appointments(self):  
@@ -115,16 +109,13 @@ class Patient:
 # Пример создания объекта
 patient = Patient("Иван", "1990-01-01", "+79876543210", "my.ownsite@ourearth.org", "ул. Пушкина, д. Колотушкина")
 print(patient)
-# Создание и добавление посещений  
-appointment1 = Appointment("2023-01-15", "Грипп")  
-appointment2 = Appointment("2023-02-20", "Острый бронхит")  
 
-patient.add_appointment(appointment1)  
-patient.add_appointment(appointment2)  
 
 # Отображение обращений  
 print("Обращения пациента:")  
 print(patient.display_appointments())  
+#Appointment("2023-01-15", "Грипп")  
+#Appointment("2023-02-20", "Острый бронхит")  
 
 # Пример класса PatientShort
 class PatientShort(Patient):
