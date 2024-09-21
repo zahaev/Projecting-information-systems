@@ -3,9 +3,9 @@ from datetime import datetime
 import json
 class Patient:
   def __init__(self, *args):
-    if len(args) == 1 and isinstance(args[0], str):
+    if len(args) == 1 and isinstance(args[0], str):#вызов метода если аргумент строка
         self.__init_from_string(args[0])
-    elif isinstance(args[0], dict):
+    elif isinstance(args[0], dict)::#вызов метода если аргумент словарь
       self.__init_from_json(args[0])
     else:
       self.__set_field('name', args[0], self.__validate_name)
@@ -19,7 +19,7 @@ class Patient:
     data = json.loads(json_str)
     self.__init_from_json(data)
 
-  def __init_from_json(self, data):
+  def __init_from_json(self, data):#инициализация из словаря
     self.__set_field('name', data['name'], self.__validate_name)
     self.__set_field('date_of_birth', data['date_of_birth'], self.__validate_date_of_birth)
     self.__set_field('phone_number', data['phone_number'], self.__validate_phone_number)
