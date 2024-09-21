@@ -13,6 +13,7 @@ class Patient:
       self.__set_field('phone_number', args[2], self.__validate_phone_number)
       self.__set_field('email', args[3], self.__validate_email)
       self.__address = args[4]
+      self.appointments = []  # Список обращений  
 
   def __init_from_string(self, json_str):
     data = json.loads(json_str)
@@ -24,6 +25,7 @@ class Patient:
     self.__set_field('phone_number', data['phone_number'], self.__validate_phone_number)
     self.__set_field('email', data['email'], self.__validate_email)
     self.__address = data['address']
+    self.appointments = []  # Список обращений  
 
   def __set_field(self, field_name, value, validation_func):
       if not validation_func(value):
@@ -48,6 +50,19 @@ class Patient:
 
   def get_address(self):
     return self.__address
+
+ # Добавление обращения  
+  def add_appointment(self, appointment):  
+    if isinstance(appointment, Appointment):  
+      self.appointments.append(appointment)  
+    else:  
+      raise ValueError("Входные данные должны быть экземпляром класса Appointment.")  
+
+  # Список обращений  
+    def display_appointments(self):  
+      if not self.appointments:  
+        return "У пациента нет обращений."  
+      return "\n".join(str(appointment) for appointment in self.appointments)  
 
 
 # Методы валидации
@@ -100,6 +115,18 @@ class Patient:
 # Пример создания объекта
 patient = Patient("Иван", "1990-01-01", "+79876543210", "my.ownsite@ourearth.org", "ул. Пушкина, д. Колотушкина")
 print(patient)
+# Создание и добавление посещений  
+appointment1 = Appointment("2023-01-15", "Грипп")  
+appointment2 = Appointment("2023-02-20", "Острый бронхит")  
+
+patient.add_appointment(appointment1)  
+patient.add_appointment(appointment2)  
+
+# Отображение обращений  
+print("Обращения пациента:")  
+print(patient.display_appointments())  
+
+# Пример класса PatientShort
 class PatientShort(Patient):
   def __str__(self):
     return f"{self.get_name()}."
