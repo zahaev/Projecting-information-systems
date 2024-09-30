@@ -1,0 +1,51 @@
+import yaml  
+
+class Patient_rep_yaml:  
+    def __init__(self, filename):  
+        self.filename = filename  
+        self.patients = self._read_from_file()  
+
+    def _read_from_file(self):  
+        try:  
+            with open(self.filename, 'r', encoding='utf-8') as file:  
+                data = yaml.safe_load(file)  
+                return [Patient(**item) for item in data]  
+        except FileNotFoundError:  
+            return []  
+
+    def _write_to_file(self):  
+        with open(self.filename, 'w', encoding='utf-8') as file:  
+            data = [vars(patient) for patient in self.patients]  
+            yaml.dump(data, file, allow_unicode=True)  
+
+    def get_by_id(self, patient_id):  
+        for patient in self.patients:  
+            if patient.id == patient_id:  
+                return patient  
+        return None  
+
+    def get_k_n_short_list(self, k, n):  
+        return [patient.short_info() for patient in self.patients[n:n+k]]  
+
+    def sort_by_field(self, field):  
+        self.patients.sort(key=lambda x: getattr(x, field))  
+
+    def add_patient(self, patient):  
+        patient.id = len(self.patients) + 1  # Простое присвоение ID  
+        self.patients.append(patient)  
+        self._write_to_file()  
+
+    def replace_patient(self, patient_id, new_patient):  
+        for i, patient in enumerate(self.patients):  
+            if patient.id == patient_id:  
+                self.patients[i] = new_patient  
+                new_patient.id = patient_id  
+                self._write_to_file()  
+                break  
+
+    def delete_patient(self, patient_id):  
+        self.patients = [patient for patient in self.patients if patient.id != patient_id]  
+        self._write_to_file()  
+
+    def get_count(self):  
+        return len(self.patients)  
