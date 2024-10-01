@@ -14,7 +14,7 @@ class MyEntity_rep_DB:
     # a. Получить объект по ID
     def get_by_id(self, client_id):
         query = "SELECT * FROM Clients WHERE ClientID = %s"
-        self.cursor.execute(query, (client_id))
+        self.cursor.execute(query, (client_id),)
         return self.cursor.fetchone()
 
     # b. Получить список k по счету n объектов класса short
