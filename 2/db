@@ -15,7 +15,7 @@ class MyEntity_rep_DB:
     def get_by_id(self, client_id):
         query = "SELECT * FROM Clients WHERE ClientID = %s"
         self.cursor.execute(query, (client_id),)
-        return self.cursor.fetchone()
+        return self.cursor.fetchone()# извлечение первой строки из запроса
 
     # b. Получить список k по счету n объектов класса short
     def get_k_n_short_list(self, k, n):
