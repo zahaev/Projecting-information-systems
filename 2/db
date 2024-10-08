@@ -25,14 +25,14 @@ class Patients_DB:
 
     # c. Добавить объект в список (при добавлении сформировать новый ID)
 
-    def add_client(self, name, date_of_birth, email, address, phone):
+    def add_patient(self, name, date_of_birth, email, address, phone):
         query = "INSERT INTO Patients (Name, Date_of_birth, Email, Address, Phone) VALUES (%s, %s, %s, %s, %s)"
         self.cursor.execute(query, (name, date_of_birth, email, address, phone))
         self.conn.commit()
         return self.cursor.lastrowid
 
     # d. Заменить элемент списка по ID
-    def update_client_by_id(self, patient_id, name=None, date_of_birth=None, email=None, address=None, phone=None):
+    def update_patient_by_id(self, patient_id, name=None, date_of_birth=None, email=None, address=None, phone=None):
         client = self.get_by_id(patient_id)
         if client:
             query = """  
@@ -50,7 +50,7 @@ class Patients_DB:
         return False
 
     # e. Удалить элемент списка по ID
-    def delete_client_by_id(self, patient_id):
+    def delete_patient_by_id(self, patient_id):
         query = "DELETE FROM Patients WHERE PatientID = %s"
         self.cursor.execute(query, (patient_id,))
         self.conn.commit()
@@ -62,10 +62,6 @@ class Patients_DB:
         self.cursor.execute(query)
         result = self.cursor.fetchone()
         return result['count']
-
-    def close(self):
-        self.cursor.close()
-        self.conn.close()
 
 # Пример использования
 db_entity = Patients_DB(host='localhost', user='root', password='password', database='patients_db')
@@ -83,17 +79,17 @@ patients_list = db_entity.get_k_n_short_list(20, 2)
 print(patients_list)
 
 # Обновление клиента
-if db_entity.update_client_by_id(new_patient_id, name='Петр Петрович'):
+if db_entity.update_patient_by_id(new_patient_id, name='Петр Петрович'):
     print(f"Клиент с ID {new_patient_id} успешно обновлён.")
 else:
     print(f"Клиент с ID {new_patient_id} не найден.")
 
 # Удаление клиента
-if db_entity.delete_client_by_id(new_patient_id):
-    print(f"Клиент с ID {new_patient_id} успешно удалён.")
+if db_entity.delete_patient_by_id(new_patient_id):
+    print(f"Пациент с ID {new_patient_id} успешно удалён.")
 else:
-    print(f"Не удалось удалить клиента с ID {new_patient_id}.")
+    print(f"Не удалось удалить пациента с ID {new_patient_id}.")
 
 # Получение количества клиентов
 count = db_entity.get_count()
-print(f"Количество клиентов: {count}")
+print(f"Количество пациентов: {count}")
