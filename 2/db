@@ -71,11 +71,11 @@ class Patients_DB:
 db_entity = Patients_DB(host='localhost', user='root', password='password', database='patients_db')
 
 # Добавление клиента
-new_patient_id = db_entity.add_client('Иван Иванович', '1990-01-01', 'ivan@example.com', 'Москва', '+7-999-123-4567')
+new_patient_id = db_entity.add_patient('Иван Иванович', '1990-01-01', 'ivan@example.com', 'Москва', '+7-999-123-4567')
 print(f"Добавлен клиент с ID {new_patient_id}")
 
 # Получение клиента по ID
-client = db_entity.get_by_id(new_patient_id)
+patient = db_entity.get_by_id(new_patient_id)
 print(client)
 
 # Получение списка пациентов (например, вторая страница из 20 пациентов)
