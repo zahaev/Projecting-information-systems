@@ -2,7 +2,7 @@ import json
 import yaml
 
 # Базовый класс
-class Patients:
+class Patients_DB:
     def __init__(self):
         self.data = []  # Инициализируем пустые данные
 
