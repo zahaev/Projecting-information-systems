@@ -80,7 +80,7 @@ db_data = [
 # Базовый объект класса для работы с БД
 db_patients_rep = DBPatientsRep(db_data)
 
-# Пример фильтрации (дата рождения после 01.01.2000 ) 
+# Пример фильтрации (дата рождения после 01.01.2000 ) и сортировка по возрасту
 filter_date = datetime.strptime("01.01.2000", "%d.%m.%Y")
 filter_function = lambda client: datetime.strptime(client["Date_of_birth"], "%d.%m.%Y") > filter_date
 sort_key = lambda client: datetime.strptime(client["Date_of_birth"], "%d.%m.%Y")
