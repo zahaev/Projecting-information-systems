@@ -16,11 +16,11 @@ class Patients_DB:
         self.cursor.execute(query, (patient_id,))
         return self.cursor.fetchone()
 
-    # b. Получить список k по счету n объектов класса short
+    # b. Получить список n по счету k объектов класса short
     def get_k_n_short_list(self, k, n):
-        offset = (n - 1) * k
+        offset = (k - 1) * n
         query = "SELECT * FROM Patients LIMIT %s OFFSET %s"
-        self.cursor.execute(query, (k, offset))
+        self.cursor.execute(query, (n, offset))
         return self.cursor.fetchall()
 
     # c. Добавить объект в список (при добавлении сформировать новый ID)
