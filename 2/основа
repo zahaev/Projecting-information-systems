@@ -21,10 +21,10 @@ class Patients_DB:
                 return patient
         return None
 
-    # d. Получить список k по счету n объектов класса short
+       # d. Получить список n по счету k объектов класса short
     def get_k_n_short_list(self, k, n):
-        start_index = (n - 1) * k
-        end_index = start_index + k
+        start_index = (k - 1) * n
+        end_index = start_index + n
         return self.data[start_index:end_index]
 
     # e. Сортировать элементы по выбранному полю (по умолчанию по фамилии)
