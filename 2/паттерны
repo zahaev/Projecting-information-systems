@@ -42,11 +42,11 @@ class MyEntity_rep_DB:
         cursor = self.db.execute_query(query, (client_id,))
         return cursor.fetchone()
 
-    # b. Получить список k по счету n объектов класса short
+    # b. Получить список n по счету k объектов класса short
     def get_k_n_short_list(self, k, n):
-        offset = (n - 1) * k
+        offset = (k - 1) * n
         query = "SELECT * FROM Clients LIMIT %s OFFSET %s"
-        cursor = self.db.execute_query(query, (k, offset))
+        cursor = self.db.execute_query(query, (n, offset))
         return cursor.fetchall()
 
     # c. Добавить объект в список (при добавлении сформировать новый ID)
