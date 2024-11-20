@@ -31,7 +31,7 @@ class MainView:
 
     def open_patients_list_window(self):
         from controller import PatientsListController  # Импорт внутри метода
-        patients_list_controller = PatientsListController(self.controller.model, self.controller)  # Создаём контроллер для списка пациентов
+        patients_list_controller = PatientsListController(self.controller.model, self.controller,self)  # Создаём контроллер для списка пациентов
         PatientsListView(self.window, patients_list_controller)  # Передаём контроллер в вид
 
 class PatientView:
