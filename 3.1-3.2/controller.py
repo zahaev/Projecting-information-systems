@@ -8,9 +8,7 @@ class MainController:
         self.view = view
         self.model.add_observer(self)
 
-    def fetch_data(self):
-        data = self.model.get_data_from_db()  # Получаем данные из базы данных
-        self.view.update_data(data)  # Обновляем представление с новыми данными
+    
     def update(self, data)
         self.view.update_data(data) # Обновляем данные в представлении, когда модель уведомляет об изменениях
 
