@@ -46,7 +46,7 @@ class PatientView:
         self.name_entry = tk.Entry(self.window)
         self.name_entry.pack(pady=5)
 
-        tk.Label(self.window, text="Дата рождения (DD-MM-YYYY):").pack(pady=5)
+        tk.Label(self.window, text="Дата рождения (YYYY-MM-DD):").pack(pady=5)
         self.dob_entry = tk.Entry(self.window)
         self.dob_entry.pack(pady=5)
 
@@ -71,6 +71,13 @@ class PatientView:
         email = self.email_entry.get()
         address = self.address_entry.get()
         phone = self.phone_entry.get()
+        patient_data = {
+            'name': name,
+            'dob': dob,
+            'email': email,
+            'address': address,
+            'phone': phone
+        }
 
         self.controller.add_patient(name,dob,email,address,phone)  # Вызов метода контроллера для добавления пациента
         #if self.controller
