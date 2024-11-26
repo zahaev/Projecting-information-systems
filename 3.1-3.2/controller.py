@@ -8,22 +8,11 @@ class MainController:
         self.model = model
         self.view = view
 
-    #def fetch_data(self):
-      #data = self.model.get_data_from_db()  # Получаем данные из базы данных
-      #self.view.update_data(data)  # Обновляем представление с новыми данными
-    def update(self, data):#НОРМАЛЬНУЮ ССЛЫКУ НА ПОДКОНТРОЛЛЕР СУКААААААААААААААА
+   
+    def update(self, data)
         data = self.model.get_data_from_db()
         self.view.update_data(data) # Обновляем данные в представлении, когда модель уведомляет об изменениях
 
-        # -------------------------------сделать ссылку на другие конторллеры---------------------------------------------
-    #def add_patient(self, patient_data):
-       #return self.model.add_patient(patient_data)
-    #def get_patients(self):
-        #return self.model.get_data_from_db()  # Получаем список пациентов из модели
-
-    #def update(self, data):
-        # Обновляем данные в представлении, когда модель уведомляет об изменениях
-        #self.view.update_data(data)
 class PatientController:
     def __init__(self, model,controller,view):
         self.model = model
