@@ -9,8 +9,8 @@ class MainController:
         self.view = view
 
     #def fetch_data(self):
-    #  data = self.model.get_data_from_db()  # Получаем данные из базы данных
-    #  self.view.update_data(data)  # Обновляем представление с новыми данными
+      #data = self.model.get_data_from_db()  # Получаем данные из базы данных
+      #self.view.update_data(data)  # Обновляем представление с новыми данными
     def update(self, data):#НОРМАЛЬНУЮ ССЛЫКУ НА ПОДКОНТРОЛЛЕР СУКААААААААААААААА
         data = self.model.get_data_from_db()
         self.view.update_data(data) # Обновляем данные в представлении, когда модель уведомляет об изменениях
@@ -35,21 +35,20 @@ class PatientController:
             self.__validate_date_of_birth(dob)
             self.__validate_email(email)
             self.__validate_phone_number(phone)
+            patient_data = {
+                'name': name,
+                'dob': dob,
+                'email': email,
+                'address': address,
+                'phone': phone
+            }
             # Если данные валидны, добавляем пациента в модель
-            self.model.add_patient(name, dob,email,address, phone)
-            self.view.update_list()  # Обновляем список в представлении
+            self.model.add_patient(patient_data)
+            self.view.update_data(patient_data)  # Обновляем список в представлении
 
         except ValueError as e:# Отображаем сообщение об ошибке
             self.controller.view.show_error(str(e))
-            #self.view.show_error("Некорректные данные. Пожалуйста, проверьте вводимые значения.")
-        patient_data = {
-            'name': name,
-            'dob': dob,
-            'email': email,
-            'address': address,
-            'phone': phone
-        }
-        return self.model.add_patient(patient_data)
+
 
     # Методы валидации
     def __validate_patient_name(self, name):
@@ -60,10 +59,10 @@ class PatientController:
 
     def __validate_date_of_birth(self, date_of_birth):
         try:
-            datetime.strptime(date_of_birth, '%d-%m-%Y')
+            datetime.strptime(date_of_birth, '%Y-%m-%d')
             return True
         except ValueError:
-            raise ValueError("Дата рождения должна быть в формате ДД-ММ-ГГГГ.")
+            raise ValueError("Дата рождения должна быть в формате ГГГГ-ММ-ДД.")
 
     def __validate_email(self, email):
         pattern_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
