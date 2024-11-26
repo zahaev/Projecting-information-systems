@@ -1,0 +1,118 @@
+#controller.py
+from view import PatientView,PatientsListView
+from model import Patients_DB
+from datetime import datetime
+import re
+class MainController:
+    def __init__(self, model, view):
+        self.model = model
+        self.view = view
+        self.model.add_observer(self)
+
+    #def fetch_data(self):
+    #  data = self.model.get_data_from_db()  # Получаем данные из базы данных
+    #  self.view.update_data(data)  # Обновляем представление с новыми данными
+    def update(self, data):#НОРМАЛЬНУЮ ССЛЫКУ НА ПОДКОНТРОЛЛЕР СУКААААААААААААААА
+        data = self.model.get_data_from_db()
+        self.view.update_data(data) # Обновляем данные в представлении, когда модель уведомляет об изменениях
+
+        # -------------------------------сделать ссылку на другие конторллеры---------------------------------------------
+    #def add_patient(self, patient_data):
+       #return self.model.add_patient(patient_data)
+    #def get_patients(self):
+        #return self.model.get_data_from_db()  # Получаем список пациентов из модели
+
+    #def update(self, data):
+        # Обновляем данные в представлении, когда модель уведомляет об изменениях
+        #self.view.update_data(data)
+class PatientController:
+    def __init__(self, model,controller,view):
+        self.model = model
+        self.controller = controller
+        self.view=view
+    def add_patient(self,name,dob,email,address,phone):
+        try:
+            self.__validate_patient_name(name)
+            self.__validate_date_of_birth(dob)
+            self.__validate_email(email)
+            self.__validate_phone_number(phone)
+            # Если данные валидны, добавляем пациента в модель
+            self.model.add_patient(name, dob,email,address, phone)
+            self.view.update_list()  # Обновляем список в представлении
+
+        except ValueError as e:# Отображаем сообщение об ошибке
+            self.controller.view.show_error(str(e))
+            #self.view.show_error("Некорректные данные. Пожалуйста, проверьте вводимые значения.")
+        patient_data = {
+            'name': name,
+            'dob': dob,
+            'email': email,
+            'address': address,
+            'phone': phone
+        }
+        return self.model.add_patient(patient_data)
+    def add_observer(self, observer):
+        self.model._observers.append(observer)
+
+
+    def notify_observers(self):
+       for observer in self._observers:
+          observer.update(self._data)
+    # Методы валидации
+    def __validate_patient_name(self, name):
+        if isinstance(name, str) and name.isalpha():
+            return True
+        raise ValueError("Некорректное ФИО.")
+
+
+    def __validate_date_of_birth(self, date_of_birth):
+        try:
+            datetime.strptime(date_of_birth, '%d-%m-%Y')
+            return True
+        except ValueError:
+            raise ValueError("Дата рождения должна быть в формате ДД-ММ-ГГГГ.")
+
+    def __validate_email(self, email):
+        pattern_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+        if re.fullmatch(pattern_email, email):
+            return True
+
+        raise ValueError("Некорректный email.")
+    def __validate_phone_number(self, phone_number):
+        pattern = r'^\+?\d{10,15}$'
+        if re.match(pattern, phone_number):
+            return True
+
+        raise ValueError("Некорректный номер телефона.")
+
+class PatientsListController:
+    def __init__(self, model,controller,view):
+        self.model = model
+        self.controller = controller
+        self.view = view
+
+    def get_patients(self):
+        return self.model.get_data_from_db()  # Получаем список пациентов из модели
+    def delete_patient(self,patient_data):
+        self.model.delete_patient(patient_data)
+    def remove_observer(self, observer):
+        if observer in self._observers:
+            self._observers.remove(observer)
+
+class PatientRegistry:
+    def __init__(self,model,controller):
+        self.model=model
+        self.controller=controller
+        self._observers = []
+
+    def add_observer(self, observer):
+        if observer not in self._observers:
+            self._observers.append(observer)
+
+    def remove_observer(self, observer):
+        if observer in self._observers:
+            self._observers.remove(observer)
+
+    def notify_observers(self):
+        for observer in self._observers:
+            observer.update()
