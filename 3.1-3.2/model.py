@@ -36,7 +36,13 @@ class Patients_DB:
         try:
             with self.conn.cursor() as cursor:
                 query = "INSERT INTO Patients (Name, Date_of_birth, Email, Address, Phone) VALUES (%s, %s, %s, %s, %s)"
-                cursor.execute(query, patient_data)  # Передаем кортеж данных
+                cursor.execute(query,  (
+                patient_data['name'],
+                patient_data['dob'],
+                patient_data['email'],
+                patient_data['address'],
+                patient_data['phone']
+            ))  # Передаем кортеж данных
                 self.conn.commit()  # Не забудьте зафиксировать изменения
                 print("Пациент добавлен успешно")
                 return True  # Успешное добавление
