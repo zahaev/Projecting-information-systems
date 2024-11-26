@@ -26,13 +26,15 @@ class MainView:
 
     def open_add_patient_window(self):
         from controller import PatientController  # Импорт внутри метода
-        patient_controller = PatientController(self.controller.model, self.controller)  # Создаём контроллер для добавления пациента
+        patient_controller = PatientController(self.controller.model, self.controller,self)  # Создаём контроллер для добавления пациента
         PatientView(self.window, patient_controller)  # Передаём контроллер в вид
 
     def open_patients_list_window(self):
         from controller import PatientsListController  # Импорт внутри метода
         patients_list_controller = PatientsListController(self.controller.model, self.controller,self)  # Создаём контроллер для списка пациентов
         PatientsListView(self.window, patients_list_controller)  # Передаём контроллер в вид
+    def show_error(self, message):
+        messagebox.showerror("Ошибка", message)
 
 class PatientView:
     def __init__(self, parent, controller):
@@ -64,19 +66,23 @@ class PatientView:
         add_button.pack(pady=10)
 
     def add_patient(self):
-        patient_data = (
-            self.name_entry.get(),
-            self.dob_entry.get(),
-            self.email_entry.get(),
-            self.address_entry.get(),
-            self.phone_entry.get()
-        )
-        if self.controller.add_patient(patient_data):  # Вызываем метод add_patient контроллера
-            messagebox.showinfo("Успех", "Пациент добавлен успешно!")
-            self.window.destroy()  # Закрываем окно после добавления
-            self.controller.controller.fetch_data()  # Обновляем данные в главном контроллере
-        else:
-            messagebox.showerror("Ошибка", "Не удалось добавить пациента.")
+        name=self.name_entry.get()
+        dob = self.dob_entry.get()
+        email = self.email_entry.get()
+        address = self.address_entry.get()
+        phone = self.phone_entry.get()
+
+        self.controller.add_patient(name,dob,email,address,phone)  # Вызов метода контроллера для добавления пациента
+        #if self.controller
+        #if self.controller.add_patient(patient_data):  # Вызываем метод add_patient контроллера
+            #messagebox.showinfo("Успех", "Пациент добавлен успешно!")
+            #self.window.destroy()  # Закрываем окно после добавления
+            #self.controller.controller.fetch_data()  # Обновляем данные в главном контроллере
+       # else:
+            #messagebox.showerror("Ошибка", "Не удалось добавить пациента.")
+    #def show_error(self, message):
+        #messagebox.showerror("Ошибка", message)
+
 
 class PatientsListView:
     def __init__(self, parent, controller):
@@ -93,8 +99,36 @@ class PatientsListView:
         self.close_button = tk.Button(self.window, text="Закрыть", command=self.window.destroy)
         self.close_button.pack(pady=5)
 
+
+        self.delete_button = tk.Button(self.window, text="Удалить", command=self.delete_patient)
+        self.delete_button.pack(pady=5)
         self.update_list()  # Изначально обновляем список при открытии окна
 
+
+    def delete_patient(self):
+        selected_patient = self.get_selected_patient()
+        if selected_patient:
+            if messagebox.askyesno("Подтверждение", "Вы уверены, что хотите удалить этого пациента?"):
+                self.controller.delete_patient(selected_patient)
+                self.update_list()
+    #def delete_patient(self):
+        # Код для получения выбранного пациента из списка и сослать на метод удаления в модели
+        #selected_patient = self.get_selected_patient()
+        #self.controller.delete_patient(selected_patient)
+    def get_selected_patient(self):
+        selected_indices = self.listbox.curselection()
+        if selected_indices:
+            selected_index = selected_indices[0]
+            patient_data = self.listbox.get(selected_index).split(", ")
+            return {
+                'name': patient_data[0],
+                'dob': patient_data[1],
+                'email': patient_data[2],
+                'address': patient_data[3],
+                'phone': patient_data[4]
+            }
+        else:
+            return None
     def update_list(self):
         self.listbox.delete(0, tk.END)  # Очищаем список
         patients = self.controller.get_patients()  # Вызываем метод get_patients контроллера
