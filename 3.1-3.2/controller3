@@ -1,0 +1,95 @@
+#controller.py
+from datetime import datetime
+import re
+
+class MainController:
+    def __init__(self, model, view):
+        self.model = model
+        self.view = view
+
+    def attach(self, observer):
+        self.model._observers.append(observer)
+
+    def detach(self, observer):
+        self.model._observers.remove(observer)
+
+    def notify(self, message):
+        for observer in self.model._observers:
+            observer.update(message)  # Уведомление наблюдателей об изменении
+
+class PatientController:
+    def __init__(self, model, controller, view):
+        self.model = model
+        self.controller = controller
+        self.view = view
+
+    def add_patient(self, name, dob, email, address, phone):
+        try:
+            # Валидация данных пациента
+            self.__validate_patient_name(name)
+            self.__validate_date_of_birth(dob)
+            self.__validate_email(email)
+            self.__validate_phone_number(phone)
+            patient_data = {
+                'name': name,
+                'dob': dob,
+                'email': email,
+                'address': address,
+                'phone': phone
+            }
+            # Если данные валидны, добавляем пациента в модель
+            self.model.add_patient(patient_data)
+            self.view.update_data(self.model.get_data_from_db())  # Обновляем список в представлении
+
+            # Уведомляем нового пациента
+            self.model.notify(f"Привет, я - {patient_data['name']}!")
+
+            # Получаем существующих пациентов
+            existing_patients = self.controller.get_patients()
+            for patient in existing_patients:
+                # Уведомляем остальную часть пациентов
+                if patient['name'] != patient_data['name']:  # Убедимся, что не уведомляем сама себя
+                    self.model.notify(f"Привет, {patient_data['name']}!")
+
+            # Обновляем представление
+            self.controller.update(patient_data)
+        except ValueError as e:  # Отображаем сообщение об ошибке
+            self.controller.view.show_error(str(e))
+
+    # Методы валидации продолжают оставаться без изменений
+    def __validate_patient_name(self, name):
+        if isinstance(name, str) and name.isalpha():
+            return True
+        raise ValueError("Некорректное ФИО.")
+
+    def __validate_date_of_birth(self, date_of_birth):
+        try:
+            datetime.strptime(date_of_birth, '%Y-%m-%d')
+            return True
+        except ValueError:
+            raise ValueError("Дата рождения должна быть в формате ГГГГ-ММ-ДД.")
+
+    def __validate_email(self, email):
+        pattern_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+        if re.fullmatch(pattern_email, email):
+            return True
+        raise ValueError("Некорректный email.")
+
+    def __validate_phone_number(self, phone_number):
+        pattern = r'^\+?\d{10,15}$'
+        if re.match(pattern, phone_number):
+            return True
+        raise ValueError("Некорректный номер телефона.")
+
+class PatientsListController:
+    def __init__(self, model, controller, view):
+        self.model = model
+        self.controller = controller
+        self.view = view
+
+    def get_patients(self):
+        return self.model.get_data_from_db()  # Получаем список пациентов из модели
+
+    def delete_patient(self, patient_data):
+        self.model.delete_patient(patient_data)  # Удаляем пациента из модели
+        self.view.update_data(self.model.get_data_from_db())  # Обновляем список в представлении после удаления
