@@ -1,0 +1,12 @@
+#patient.py
+class Patient:
+
+    def __init__(self, name):
+        self.name = name
+
+    def introduce(self):
+        print(f"Привет, меня зовут {self.name}.")  # Приветственное сообщение
+
+    def update(self, message):
+        print(f"Уведомление для {self.name}: {message}")
+
