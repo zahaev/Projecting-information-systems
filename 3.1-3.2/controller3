@@ -7,16 +7,9 @@ class MainController:
         self.model = model
         self.view = view
 
-    def attach(self, observer):
-        self.model._observers.append(observer)
-
-    def detach(self, observer):
-        self.model._observers.remove(observer)
-
-    def notify(self, message):
-        for observer in self.model._observers:
-            observer.update(message)  # Уведомление наблюдателей об изменении
-
+    def update(self, data):
+        data = self.model.get_data_from_db()
+        self.view.update_data(data)  # Обновляем данные в представлении, когда модель уведомляет об изменениях
 class PatientController:
     def __init__(self, model, controller, view):
         self.model = model
@@ -42,19 +35,22 @@ class PatientController:
             self.view.update_data(self.model.get_data_from_db())  # Обновляем список в представлении
 
             # Уведомляем нового пациента
-            self.model.notify(f"Привет, я - {patient_data['name']}!")
+
 
             # Получаем существующих пациентов
-            existing_patients = self.controller.get_patients()
+            existing_patients = self.model.get_data_from_db()
             for patient in existing_patients:
+                # Предполагаем, что имя пациента находится в первом элементе кортежа
+                patient_name = patient[0]  # Получаем имя пациента из кортежа
                 # Уведомляем остальную часть пациентов
-                if patient['name'] != patient_data['name']:  # Убедимся, что не уведомляем сама себя
+                if patient_name != patient_data['name']:
                     self.model.notify(f"Привет, {patient_data['name']}!")
-
-            # Обновляем представление
-            self.controller.update(patient_data)
+                else:
+                    self.model.notify(f"Привет, я - {patient_data['name']}!")
+                    # Обновляем представление
+            self.controller.update(self.model.get_data_from_db())
         except ValueError as e:  # Отображаем сообщение об ошибке
-            self.controller.view.show_error(str(e))
+            self.view.show_error(str(e))
 
     # Методы валидации продолжают оставаться без изменений
     def __validate_patient_name(self, name):
