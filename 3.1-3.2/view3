@@ -8,8 +8,8 @@ class MainView:
         window.title("Главное окно")  
         window.geometry('400x250')  
 
-        self.label = tk.Label(window, text="Данные:")  
-        self.label.pack()  
+        self.label = tk.Label(window, text="Данные:")
+        #self.label.pack()
 
         self.add_patient_button = tk.Button(window, text="Добавить пациента", command=self.open_add_patient_window)  
         self.add_patient_button.pack(pady=10)  
