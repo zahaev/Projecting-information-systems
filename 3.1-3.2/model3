@@ -72,10 +72,8 @@ class Patients_DB:
                     patient_data['phone']))
                 self.conn.commit()
                 print("Пациент удален успешно")
-
                 # Уведомляем всех наблюдателей о том, что пациент был удален  
                 self.notify(f"Пациент {patient_data['name']} был удален.")
-
                 return True
         except Exception as e:
             print(f"Error deleting patient: {e}")
