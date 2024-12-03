@@ -58,7 +58,7 @@ class Patients_DB:
                 self.attach(new_patient)  # Добавляем нового пациента как наблюдателя
 
                 # Уведомляем существующих пациентов о новом пациенте
-                self.notify(f"Привет, {patient_data['name']}!")
+                #self.notify(f"Привет, {patient_data['name']}!")
                 return True
         except Exception as e:
             print(f"Error adding patient: {e}")
