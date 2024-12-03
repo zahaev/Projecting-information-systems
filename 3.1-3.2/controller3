@@ -7,14 +7,12 @@ class MainController:
         self.model = model
         self.view = view
 
-    def update(self, data):
-        data = self.model.get_data_from_db()
-        self.view.update_data(data)  # Обновляем данные в представлении, когда модель уведомляет об изменениях
 class PatientController:
     def __init__(self, model, controller, view):
         self.model = model
         self.controller = controller
         self.view = view
+
 
     def add_patient(self, name, dob, email, address, phone):
         try:
@@ -32,11 +30,8 @@ class PatientController:
             }
             # Если данные валидны, добавляем пациента в модель
             self.model.add_patient(patient_data)
-            self.view.update_data(self.model.get_data_from_db())  # Обновляем список в представлении
 
-            # Уведомляем нового пациента
-
-
+            #self.view.update_data(self.model.get_data_from_db())  # Обновляем список в представлении
             # Получаем существующих пациентов
             existing_patients = self.model.get_data_from_db()
             for patient in existing_patients:
@@ -44,19 +39,18 @@ class PatientController:
                 patient_name = patient[0]  # Получаем имя пациента из кортежа
                 # Уведомляем остальную часть пациентов
                 if patient_name != patient_data['name']:
-                    self.model.notify(f"Привет, {patient_data['name']}!")
-                else:
-                    self.model.notify(f"Привет, я - {patient_data['name']}!")
-                    # Обновляем представление
-            self.controller.update(self.model.get_data_from_db())
+                    self.model.notify(f"Добавлен  {patient_data['name']}!")
+                #else:
+                    #self.model.notify(f"Привет, я - {patient_data['name']}!")
+
         except ValueError as e:  # Отображаем сообщение об ошибке
             self.view.show_error(str(e))
 
-    # Методы валидации продолжают оставаться без изменений
+    # Валидация
     def __validate_patient_name(self, name):
         if isinstance(name, str) and name.isalpha():
             return True
-        raise ValueError("Некорректное ФИО.")
+        raise ValueError("ФИО должно содержать только буквы.")
 
     def __validate_date_of_birth(self, date_of_birth):
         try:
@@ -88,4 +82,3 @@ class PatientsListController:
 
     def delete_patient(self, patient_data):
         self.model.delete_patient(patient_data)  # Удаляем пациента из модели
-        self.view.update_data(self.model.get_data_from_db())  # Обновляем список в представлении после удаления
