@@ -32,7 +32,7 @@ class Patients_DB:
     def get_data_from_db(self):
         try:
             with self.conn.cursor() as cursor:
-                cursor.execute("SELECT Name, Date_of_birth, Email, Address, Phone FROM Patients")
+                cursor.execute("SELECT Name, Date_of_birth, Email, Address, Phone FROM Patients ORDER BY Name ASC")
                 self._data = cursor.fetchall()
                 return self._data
         except Exception as e:
