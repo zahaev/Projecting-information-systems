@@ -72,7 +72,7 @@ print(f"Добавлен клиент с ID {new_patient_id}")
 
 # Получение клиента по ID
 patient = db_entity.get_by_id(new_patient_id)
-print(client)
+print(patient)
 
 # Получение списка пациентов (например, вторая страница из 20 пациентов)
 patients_list = db_entity.get_k_n_short_list(20, 2)
