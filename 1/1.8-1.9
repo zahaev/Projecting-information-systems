@@ -32,8 +32,7 @@ class Patient:
           raise ValueError(f"Некорректное значение для {field_name}.")
       setattr(self, f'_{self.__class__.__name__}__{field_name}', value)
 # Геттеры
-#def get_last_name(self):
-    #return self.__last_name
+
   def get_name(self):
     return self.__name
 
