@@ -8,9 +8,6 @@ class MainView:
         window.title("Главное окно")  
         window.geometry('400x250')  
 
-        #self.label = tk.Label(window, text="Данные:")
-        #self.label.pack()
-
         self.add_patient_button = tk.Button(window, text="Добавить пациента", command=self.open_add_patient_window)  
         self.add_patient_button.pack(pady=10)  
 
@@ -19,9 +16,6 @@ class MainView:
 
     def set_controller(self, controller):  
         self.controller = controller  
-
-    #def update_data(self, data):
-        #self.label.config(text=f"Данные: {data}")  # Используем config для обновления текста
 
     def open_add_patient_window(self):  
         from controller import PatientController  # Импорт внутри метода  
@@ -33,16 +27,10 @@ class MainView:
         patients_list_controller = PatientsListController(self.controller.model, self.controller, self)  # Создаём контроллер для списка пациентов  
         PatientsListView(self.window, patients_list_controller)  # Передаём контроллер в вид
 
-
-
     def show_error(self, message):
-        messagebox.showerror("Ошибка", message)  
+        messagebox.showerror("Ошибка", message)
 
-    def receive_notification(self, message):  
-        messagebox.showinfo("Уведомление", message)  # Показываем уведомление  
-
-
-class PatientView:  
+class AddPatientView:
     def __init__(self, parent, patient_controller):
         self.patient_controller = patient_controller  # Получаем PatientController для использования
         self.window = tk.Toplevel(parent)  
@@ -81,8 +69,8 @@ class PatientView:
 
 
 class PatientsListView:  
-    def __init__(self, parent, controller):  
-        self.controller = controller  
+    def __init__(self, parent, controller):
+        self.controller = controller
         self.window = tk.Toplevel(parent)  
         self.window.title("Список пациентов")  
 
