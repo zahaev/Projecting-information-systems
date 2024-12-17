@@ -6,3 +6,9 @@ CREATE TABLE patients (
     address VARCHAR(255),  
     phone VARCHAR(15)  
 );  
+CREATE TABLE doctors (  
+    id SERIAL PRIMARY KEY,  
+    name VARCHAR(100) NOT NULL,  
+    specialization VARCHAR(100) NOT NULL,  
+    cabimet VARCHAR(100) NOT NULL
+);  
