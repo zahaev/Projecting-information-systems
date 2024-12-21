@@ -1,0 +1,308 @@
+from view import (PatientView,PatientListView,  DoctorView,DoctorListView
+,ServiceView,ServiceListView,AppointmentView,AppointmentListView)
+from datetime import datetime
+import re
+from tkinter import messagebox
+
+class MainController:
+    def __init__(self, patient_controller,patient_list_controller, doctor_controller,
+        doctor_list_controller,service_controller,service_list_controller,app_controller,app_list_controller):
+        self.app_list_controller = app_list_controller
+        self.app_controller = app_controller
+        self.service_list_controller = service_list_controller
+        self.doctor_controller = doctor_controller
+        self.doctor_list_controller = doctor_list_controller
+        self.service_controller = service_controller
+        self.patient_controller = patient_controller
+        self.patient_list_controller = patient_list_controller
+        #self.main_view = MainView(self)  # Создаем главное окно
+        # Хранение ссылки на главное окно
+        self.main_view = None
+
+    def set_main_view(self, main_view):
+        self.main_view = main_view  # Сохраняем ссылку на главное окно
+
+    def open_patient_view(self):
+        patient_view = PatientView(self.patient_controller,
+                                   self)  # Передаем контроллер пациента и текущий экземпляр MainController
+
+    def open_patient_list_view(self):
+        patient_list_view = PatientListView(self.patient_list_controller,self)
+        patient_list_view.refresh_patient_list()
+        patient_list_view.run()
+
+    def open_doctor_view(self):
+        doctor_view = DoctorView(self.doctor_controller,
+                                 self)  # Передаем контроллер врача и текущий экземпляр MainController
+
+    def open_doctor_list_view(self):
+        doctor_list_view = DoctorListView(self.doctor_list_controller, self)
+        doctor_list_view.update_list()
+        #doctor_list_view.run()
+
+    def open_service_view(self):
+        service_view = ServiceView(self.service_controller,self)
+        #service_view.run()
+    def open_service_list_view(self):
+        service_list_view = ServiceListView(self.service_list_controller,self)
+
+    def open_app_view(self):
+        app_view = AppointmentView(self.app_controller,self)
+
+    def open_app_list_view(self):
+        app_list_view = AppointmentListView(self.app_list_controller,self)
+
+    def go_back_to_main(self):
+        # Вернуть управление в главное окно
+        if self.main_view is not None:
+            self.main_view.run()  # Запустите главное окно
+
+class UniversalSorter:
+    def __init__(self, data):
+        self.data = data
+
+    def sort(self, key):
+        """Сортирует данные по заданному ключу."""
+        return sorted(self.data, key=lambda x: x[key])
+
+class PatientController:
+    def __init__(self, patient_model):
+        self.patient_model = patient_model
+
+    def add_patient(self, name, dob, email, address, phone):
+        try:
+            # Валидация данных пациента
+            self.__validate_patient_name(name)
+            self.__validate_date_of_birth(dob)
+            self.__validate_email(email)
+            self.__validate_phone_number(phone)
+            patient_data = {
+                    'name': name,
+                    'dob': dob,
+                    'email': email,
+                    'address': address,
+                    'phone': phone
+                }
+            # Если данные валидны, добавляем пациента в модель
+            self.patient_model.add_patient(patient_data)
+        except ValueError as e:  # Отображаем сообщение об ошибке
+            messagebox.showerror("Ошибка", str(e))
+
+        # Валидация
+    def __validate_patient_name(self, name):
+        if isinstance(name, str) and name.isalpha():
+            return True
+        raise ValueError("ФИО должно содержать только буквы.")
+
+    def __validate_date_of_birth(self, date_of_birth):
+        try:
+            datetime.strptime(date_of_birth, '%Y-%m-%d')
+            return True
+        except ValueError:
+            raise ValueError("Дата рождения должна быть в формате ГГГГ-ММ-ДД.")
+
+    def __validate_email(self, email):
+        pattern_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+        if re.fullmatch(pattern_email, email):
+            return True
+        raise ValueError("Некорректный email.")
+
+    def __validate_phone_number(self, phone_number):
+        pattern = r'^\+?\d{10,17}$'
+        if re.match(pattern, phone_number):
+            return True
+        raise ValueError("Некорректный номер телефона.")
+
+class PatientListController:
+    def __init__(self,patient_model):
+        self.patient_model = patient_model
+
+    def delete_patient(self, patient_data):
+        try:
+            self.patient_model.delete_patient(patient_data)
+        except ValueError:
+            pass  # Ничего не делаем, если пациента нет в списке
+
+    def sort_patients(self,patients,selected):
+
+        sorter=UniversalSorter(patients)
+        if selected == "Sort by Id":
+            sorted_patients = sorter.sort(0)  # Сортировка по индексу 1 (имя)
+        elif selected == "Sort by Name":
+            sorted_patients = sorter.sort(1)
+        elif selected == "Sort by Date of Birth":
+            sorted_patients = sorter.sort(2)  # Сортировка по индексу 2 (имя)
+        else:
+            sorted_patients = patients  # Если ничего не выбрано
+
+        return sorted_patients
+
+    def get_patients(self):
+        return self.patient_model.get_data_from_db()
+
+class DoctorController:
+    def __init__(self, doctor_model):
+        self.doctor_model = doctor_model
+
+    def add_doctor(self, name,specialization,cabinet):
+        try:
+            # Валидация данных пациента
+            self.__validate_(name)
+            self.__validate_(specialization)
+            self.__validate_(cabinet)
+            doctor_data = {
+                    'name': name,
+                    'specialization': specialization,
+                    'cabinet': cabinet
+                }
+            # Если данные валидны, добавляем пациента в модель
+            self.doctor_model.add_doctor(doctor_data)
+            #messagebox.showerror("Успешно","Врач добавлен")
+        except ValueError as e:  # Отображаем сообщение об ошибке
+            messagebox.showerror("Ошибка", str(e))
+
+    def __validate_(self, name):
+        if isinstance(name, str) and name.isalpha():
+            return True
+        raise ValueError("Поле должно содержать только буквы.")
+
+class DoctorListController:
+    def __init__(self, doctor_model):
+        self.doctor_model = doctor_model
+
+    def delete_doctor(self,doctor_data):
+        self.doctor_model.delete_doctor(doctor_data)
+
+    def sort_doctors(self,doctors,selected):
+        sorter=UniversalSorter(doctors)
+        if selected == "Sort by Id":
+            sorted_doctors= sorter.sort(0)# Сортировка по индексу 1 (имя)
+        elif selected == "Sort by Name":
+            sorted_doctors = sorter.sort(1)
+        elif selected == "Sort by Spetialization":
+            sorted_doctors = sorter.sort(2)
+        elif selected == "Sort by Cabinet":
+            sorted_doctors = sorter.sort(3)
+        else:
+            sorted_doctors = doctors  # Если ничего не выбрано
+
+        return sorted_doctors
+
+    def get_doctors(self):
+        return self.doctor_model.get_data_from_db()
+
+class ServiceController:
+    def __init__(self,service_model):
+        self.service_model=service_model
+    def add_service(self, name,cost):
+        try:
+            # Валидация данных услуги
+            self.__validate_service_name(name)
+            self.__validate_service_cost(cost)
+            service_data = {
+                    'name': name,
+                    'cost': cost
+                }
+
+            self.service_model.add_service(service_data)
+        except ValueError as e:
+            messagebox.showerror("Ошибка", str(e))
+
+    def __validate_service_name(self, name):
+        if isinstance(name, str) and name.isalpha():
+            return True
+        raise ValueError("Поле должно содержать только буквы.")
+
+    def __validate_service_cost(self, cost):
+        try:
+            # Преобразуем цену в число с плавающей запятой
+            cost = float(cost)
+
+            if cost <= 0:
+                raise ValueError("Цена должна быть положительным числом.")
+            return True
+
+        except ValueError:
+            return False, "Цена должна быть числом."
+
+
+class ServiceListController:
+    def __init__(self,service_model):
+        self.service_model=service_model
+    def delete_service(self, patient_data):
+        try:
+            self.service_model.delete_patient(patient_data)
+        except ValueError:
+            pass
+    def sort_services(self,services,selected):
+        sorter=UniversalSorter(services)
+        if selected == "Sort by Id":
+            sorted_services= sorter.sort(0)
+        elif selected == "Sort by Name":
+            sorted_services = sorter.sort(1)
+        elif selected == "Sort by Cost":
+            sorted_services = sorter.sort(2)
+        else:
+            sorted_services = services  # Если ничего не выбрано
+        return sorted_services
+    def get_services(self):
+        return self.service_model.get_data_from_db()
+
+class AppointmentController:
+    def __init__(self,app_model):
+        self.app_model=app_model
+    def add_app(self, patient_id, doctor_id, appointment_date, service_id):
+        try:
+            # Валидация данных услуги
+            self.__validate_id(patient_id)
+            self.__validate_id(doctor_id)
+            self.__validate_id(service_id)
+            self.__validate_appointment_date(appointment_date)
+            app_data = {
+                    'patient_id': patient_id,
+                    'doctor_id': doctor_id,
+                    'appointment_date': appointment_date,
+                    'service_id': service_id
+                }
+            self.app_model.add_app(app_data)
+        except ValueError as e:
+            messagebox.showerror("Ошибка", str(e))
+
+    def __validate_appointment_date(self,appointment_date):
+        """Проверяет, соответствует ли строка формату TIMESTAMP."""
+        formats = ['%Y-%m-%d %H:%M:%S']  # Добавляем формат с миллисекундами
+        for fmt in formats:
+            try:
+                timestamp = datetime.strptime(appointment_date, fmt)
+                return True, timestamp
+            except ValueError:
+                raise ValueError("Дата рождения должна быть в формате YYYY-MM-DD HH:MM:SS .")
+
+class AppointmentListController:
+    def __init__(self,app_model):
+        self.app_model=app_model
+    def delete_service(self, patient_data):
+        try:
+            self.app_model.delete_patient(patient_data)
+        except ValueError:
+            pass
+    def sort_apps(self,apps,selected):
+        sorter=UniversalSorter(apps)
+        if selected == "Sort by Id":
+            sorted_apps= sorter.sort(0)
+        elif selected == "Sort by Name":
+            sorted_apps = sorter.sort(1)
+        elif selected == "Sort by Doctor":
+            sorted_apps = sorter.sort(2)
+        elif selected == "Sort by Date":
+            sorted_apps = sorter.sort(3)
+        elif selected == "Sort by Service":
+            sorted_apps = sorter.sort(4)
+        else:
+            sorted_apps = apps  # Если ничего не выбрано
+        return sorted_apps
+    def get_apps(self):
+        return self.app_model.get_data_from_db()
+
+
+
