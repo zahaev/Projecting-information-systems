@@ -1,0 +1,211 @@
+# model.py
+import psycopg2
+from patients import Patients
+
+class Database:
+    def __init__(self, db_config):
+        self.conn = psycopg2.connect(**db_config)
+        self.cursor = self.conn.cursor()
+
+    def close(self):
+        self.cursor.close()
+        self.conn.close()
+
+class PatientModel:
+    def __init__(self, db):
+        self.db = db
+        self._observers = []  # Список наблюдателей (пациентов)
+        self._data = []
+
+    def attach(self, observer):
+        self._observers.append(observer)
+
+    def detach(self, observer):
+        self._observers.remove(observer)
+
+    def notify(self, message):
+        for observer in self._observers:
+            observer.update(message)  # Уведомление наблюдателей об изменении
+
+    def add_patient(self, patient_data):
+        try:
+            with self.db.conn.cursor() as cursor:
+                query = "INSERT INTO Patients (Name, Date_of_birth, Email, Address, Phone) VALUES (%s, %s, %s, %s, %s)"
+                cursor.execute(query, (
+                    patient_data['name'],
+                    patient_data['dob'],
+                    patient_data['email'],
+                    patient_data['address'],
+                    patient_data['phone']
+                ))
+                self.db.conn.commit()
+                print("Пациент добавлен успешно")
+
+                # Создание объекта пациента, который также выведет приветственное сообщение
+                new_patient = Patients(patient_data['name'])
+                self.attach(new_patient)  # Добавляем нового пациента как наблюдателя
+                return True
+        except Exception as e:
+            print(f"Error adding patient: {e}")
+
+    def delete_patient(self, patient_data):
+        try:
+            with self.db.conn.cursor() as cursor:
+                query = "DELETE FROM Patients WHERE Name = %s AND Date_of_birth = %s AND Email = %s AND Address = %s AND Phone = %s"
+                cursor.execute(query, (
+                    patient_data['name'], patient_data['dob'], patient_data['email'], patient_data['address'],
+                    patient_data['phone']))
+                self.db.conn.commit()
+                print("Пациент удален успешно")
+                # Уведомляем всех наблюдателей о том, что пациент был удален
+                self.notify(f"Пациент {patient_data['name']} был удален.")
+                return True
+        except Exception as e:
+            print(f"Error deleting patient: {e}")
+            return False
+
+    def get_data_from_db(self):
+        try:
+            with self.db.conn.cursor() as cursor:
+                cursor.execute("SELECT Id, Name, Date_of_birth, Email, Address, Phone FROM Patients ORDER BY Name ASC")
+                self._data = cursor.fetchall()
+                return self._data
+        except Exception as e:
+            print(f"Error fetching data: {e}")
+            return []  # Возвращаем пустой список в случае ошибки
+
+
+
+class DoctorModel:
+    def __init__(self, db):
+        self.db = db
+        self._data = []
+
+    def add_doctor(self, doctor_data):
+        try:
+            with self.db.conn.cursor() as cursor:
+                self.db.cursor.execute("""  
+                    INSERT INTO Doctors (name, specialization,cabinet)   
+                    VALUES (%s, %s, %s)  
+                    """, (doctor_data['name'],doctor_data['specialization'],doctor_data['cabinet']))
+                self.db.conn.commit()
+                print("Врач добавлен успешно")
+                return True
+        except Exception as e:
+            print(f"Error adding patient: {e}")
+
+    def get_data_from_db(self):
+        try:
+            with self.db.conn.cursor() as cursor:
+                cursor.execute("SELECT Id, Name, Specialization, Cabinet FROM Doctors ORDER BY Name ASC")
+                self._data = cursor.fetchall()
+                return self._data
+        except Exception as e:
+            print(f"Error fetching data: {e}")
+            return []
+            # Возвращаем пустой список в случае ошибки
+    def delete_doctor(self, doctor_data):
+        try:
+            with self.db.conn.cursor() as cursor:
+                query = "DELETE FROM Doctors WHERE Name = %s AND Specialization = %s"
+                cursor.execute(query, (
+                    doctor_data['name'], doctor_data['specialization']))
+                self.db.conn.commit()
+                print("Врач удален успешно")
+                return True
+        except Exception as e:
+            print(f"Error deleting patient: {e}")
+            return False
+
+'''class Sorter:
+    @staticmethod
+    def sort(data, key_index):
+
+        return sorted(data, key=lambda x: x[key_index])'''
+
+class ServiceModel:
+
+    def __init__(self, db):
+        self.db = db
+        self._data = []
+    def add_service(self, patient_data):
+        self.db.cursor.execute("""  
+            INSERT INTO Services (name, cost)   
+            VALUES (%s, %s)  
+        """, (patient_data['name'], patient_data['cost']))
+        self.db.conn.commit()
+        print("Услуга добавлена успешно")
+    def get_data_from_db(self):
+        try:
+            with self.db.conn.cursor() as cursor:
+                cursor.execute("SELECT Id, Name, Cost FROM Services ORDER BY Name ASC")
+                self._data = cursor.fetchall()
+                return self._data
+        except Exception as e:
+            print(f"Error fetching data: {e}")
+            return []
+    def delete_service(self, service_data):
+        try:
+            with self.db.conn.cursor() as cursor:
+                query = "DELETE FROM Services WHERE Name = %s AND Cost = %s"
+                cursor.execute(query, (
+                    service_data['name'], service_data['cost']))
+                self.db.conn.commit()
+                print("Услуга удалена успешно")
+                return True
+        except Exception as e:
+            print(f"Error deleting patient: {e}")
+            return False
+
+class AppointmentModel:
+    def __init__(self,db):
+        self.db=db
+        self._data = []
+    def add_app(self, app_data):
+        try:
+            with self.db.conn.cursor() as cursor:
+                query = ("INSERT INTO Appointments (patient_id, doctor_id, appointment_date, service_id) "
+                         "VALUES (%s, %s, %s, %s)")
+                cursor.execute(query, (
+                    app_data['patient_id'],
+                    app_data['doctor_id'],
+                    app_data['appointment_date'],
+                    app_data['service_id']
+                ))
+                self.db.conn.commit()
+                print (app_data)
+                print("Добавлен прием у врача")
+                return True
+        except Exception as e:
+            print(f"Error adding appointment: {e}")
+
+    def delete_app(self, app_data):
+        try:
+            with self.db.conn.cursor() as cursor:
+                query = ("DELETE FROM Appointments WHERE patient_id = %s AND doctor_id = %s "
+                         "AND appointment_date = %s  AND service_id = %s")
+                cursor.execute(query, (
+                    app_data['patient_id'], app_data['doctor_id'], app_data['appointment_date'], app_data['service_id']
+                ))
+                self.db.conn.commit()
+                print("Запись удалена успешно")
+                return True
+        except Exception as e:
+            print(f"Error deleting appointment: {e}")
+            return False
+
+    def get_data_from_db(self):
+        try:
+            with self.db.conn.cursor() as cursor:
+                cursor.execute("""  
+            SELECT a.id, p.name AS patient_name, d.name AS doctor_name, a.appointment_date, s.name AS service_name  
+            FROM Appointments a  
+            JOIN Patients p ON a.patient_id = p.id  
+            JOIN Doctors d ON a.doctor_id = d.id  
+            LEFT JOIN Services s ON a.service_id = s.id  
+        """)
+                self._data = cursor.fetchall()
+                return self._data
+        except Exception as e:
+            print(f"Error fetching data: {e}")
+            return []  # Возвращаем пустой список в случае ошибки
