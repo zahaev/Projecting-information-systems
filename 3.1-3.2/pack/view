@@ -1,0 +1,490 @@
+# view_patient.py
+import tkinter as tk
+from tkinter.ttk import Combobox
+from tkinter import messagebox,Menu,ttk
+
+class MainView:
+    def __init__(self, controller):
+        self.controller = controller
+
+        self.window = tk.Tk()
+        self.window.title("Главное окно")
+        self.window.geometry('400x250')
+
+        menu = Menu(self.window)
+        new_item = Menu(menu, tearoff=0)
+        new_item.add_command(label='Добавить',command=self.controller.open_patient_view)
+        new_item.add_command(label='Список',command=self.controller.open_patient_list_view)
+        menu.add_cascade(label='Пациенты', menu=new_item)
+
+
+        new_item2 = Menu(menu, tearoff=0)
+        new_item2.add_command(label='Добавить', command=self.controller.open_doctor_view)
+        new_item2.add_command(label='Список', command=self.controller.open_doctor_list_view)
+        menu.add_cascade(label='Врачи', menu=new_item2)
+
+        # список
+        new_item3 = Menu(menu, tearoff=0)
+        new_item3.add_command(label='Добавить', command=self.controller.open_service_view)
+        new_item3.add_command(label='Список', command=self.controller.open_service_list_view)
+        menu.add_cascade(label='Услуги', menu=new_item3)
+
+        new_item4 = Menu(menu, tearoff=0)
+        new_item4.add_command(label='Добавить', command=self.controller.open_app_view)
+        new_item4.add_command(label='Список', command=self.controller.open_app_list_view)
+        menu.add_cascade(label='Запись к врачу', menu=new_item4)
+
+
+        self.window.config(menu=menu)
+
+    def run(self):
+        self.window.mainloop()
+
+
+class PatientView:
+    def __init__(self, controller, main_controller):
+        self.controller = controller
+        self.main_controller = main_controller  # Сохранение ссылки на контроллер главного окна
+        self.window = tk.Tk()
+        self.window.title("Добавить пациента")
+        self.window.geometry('400x350')
+
+        # Ввод данных пациента
+        self.name_entry = tk.Entry(self.window)
+        self.dob_entry = tk.Entry(self.window)
+        self.email_entry = tk.Entry(self.window)
+        self.address_entry = tk.Entry(self.window)
+        self.phone_entry = tk.Entry(self.window)
+
+        # Разметка полей ввода и кнопок
+
+        tk.Label(self.window, text="Имя").pack()
+        self.name_entry.pack()
+        tk.Label(self.window, text="Дата рождения (YYYY-MM-DD)").pack()
+        self.dob_entry.pack()
+        tk.Label(self.window, text="Email").pack()
+        self.email_entry.pack()
+        tk.Label(self.window, text="Адрес").pack()
+        self.address_entry.pack()
+        tk.Label(self.window, text="Телефон").pack()
+        self.phone_entry.pack()
+
+        tk.Button(self.window, text="Добавить", command=self.add_patient).pack(pady=20)
+        tk.Button(self.window, text="Назад", command=self.go_back).pack()  # Кнопка "Назад"
+
+    def go_back(self):
+        self.window.destroy()  # Закрыть текущее окно
+        self.main_controller.go_back_to_main()  # Вернуться к главному окну
+
+    def add_patient(self):
+        name = self.name_entry.get()
+        dob = self.dob_entry.get()
+        email = self.email_entry.get()
+        address = self.address_entry.get()
+        phone = self.phone_entry.get()
+        self.controller.add_patient(name, dob, email, address,
+                                                phone)  # Вызов метода контроллера для добавления пациента
+
+    def clear_entries(self):
+        self.name_entry.delete(0, tk.END)
+        self.dob_entry.delete(0, tk.END)
+        self.email_entry.delete(0, tk.END)
+        self.address_entry.delete(0, tk.END)
+        self.phone_entry.delete(0, tk.END)
+
+    def show_error(self, message):
+        messagebox.showerror("Ошибка", message)
+    #def run(self):
+        #self.window.mainloop()
+
+class PatientListView:
+    def __init__(self, controller, main_controller):
+        self.controller = controller
+        self.main_controller=main_controller
+        self.window = tk.Toplevel(main_controller.main_view.window) # Используем основное окно как родительское
+        self.window.title("Список пациентов")
+
+        self.listbox = tk.Listbox(self.window, width=60, height=20)
+        self.listbox.pack(pady=10)
+
+        self.update_button = tk.Button(self.window, text="Обновить", command=self.refresh_patient_list)
+        self.update_button.pack(pady=5)
+
+        self.combo_sort = ttk.Combobox(self.window, values=["Sort by Id","Sort by Name", "Sort by Date of Birth"])
+        self.combo_sort.bind("<<ComboboxSelected>>", self.on_sort_selected)
+        self.combo_sort.pack(pady=5)
+
+        self.delete_button = tk.Button(self.window, text="Удалить", command=self.delete_patient)
+        self.delete_button.pack(pady=5)
+
+        self.close_button = tk.Button(self.window, text="Закрыть", command=self.window.destroy)
+        self.close_button.pack(pady=5)
+
+        self.refresh_patient_list() # Изначально обновляем список при открытии окна
+
+    def on_sort_selected(self, event):
+        """Обрабатывает выбор сортировки и обновляет список."""
+        selected = self.combo_sort.get()
+        patients = self.controller.get_patients()  # Получаем текущий список пациентов
+        sorted_patients = self.controller.sort_patients(patients, selected)  # Сортируем пациентов
+        self.refresh_patient_list(sorted_patients)  # Обновляем отображение
+
+    def delete_patient(self):
+        selected_patient = self.get_selected_patient()
+        if selected_patient:
+            if messagebox.askyesno("Подтверждение", "Вы уверены, что хотите удалить этого пациента?"):
+                self.controller.delete_patient(selected_patient)
+                self.refresh_patient_list()
+
+    def get_selected_patient(self):
+        selected_indices = self.listbox.curselection()
+        if selected_indices:
+            selected_index = selected_indices[0]
+            patient_data = self.listbox.get(selected_index).split(", ")
+            return {
+                'name': patient_data[0],
+                'dob': patient_data[1],
+                'email': patient_data[2],
+                'address': patient_data[3],
+                'phone': patient_data[4]
+            }
+        else:
+            return None
+
+    def refresh_patient_list(self, patients=None):
+        """Обновляет список пациентов в Listbox."""
+        self.listbox.delete(0, tk.END)  # Очищаем текущий список
+        if patients is None:
+            patients = self.controller.get_patients()  # Получаем текущий список пациентов, если не передан аргумент
+
+        if not patients:
+            messagebox.showinfo("Информация", "Нет доступных пациентов.")
+        else:
+            for patient in patients:
+                self.listbox.insert(tk.END,
+                                    f"{patient[0]},{patient[1]}, {patient[2]}, {patient[3]}, {patient[4]}, {patient[5]}")
+
+    def run(self):
+        self.window.mainloop()
+class DoctorView:
+    def __init__(self, controller, main_controller):
+        self.controller = controller
+        self.main_controller = main_controller  # Сохранение ссылки на контроллер главного окна
+        self.window = tk.Tk()
+        self.window.title("Добавить врача")
+        self.window.geometry('400x350')
+
+        # Ввод данных врача
+        self.name_entry = tk.Entry(self.window)
+        self.specialty_entry = tk.Entry(self.window)
+        self.cabinet_entry = tk.Entry(self.window)
+
+        # Разметка полей ввода и кнопок
+        tk.Label(self.window, text="Имя").pack(pady=10)
+        self.name_entry.pack()
+        tk.Label(self.window, text="Специальность").pack()
+        self.specialty_entry.pack()
+
+        tk.Label(self.window, text="Кабинет").pack()
+        self.cabinet_entry.pack()
+
+        tk.Button(self.window, text="Добавить", command=self.add_doctor).pack(pady=20)
+        tk.Button(self.window, text="Назад", command=self.go_back).pack()
+
+    def go_back(self):
+        self.window.destroy()
+        self.main_controller.go_back_to_main()
+
+    def add_doctor(self):
+         name = self.name_entry.get()
+         spetialty = self.specialty_entry.get()
+         cabinet = self.cabinet_entry.get()
+         self.controller.add_doctor(name,spetialty,cabinet)
+
+    def clear_entries(self):
+        self.name_entry.delete(0, tk.END)
+        self.specialty_entry.delete(0, tk.END)
+        self.cabinet_entry.delete(0, tk.END)
+
+    def run(self):
+        self.window.mainloop()
+
+class DoctorListView:
+    def __init__(self, controller, main_controller):
+        self.controller = controller
+        self.main_controller=main_controller
+        self.window = tk.Toplevel(main_controller.main_view.window) # Используем основное окно как родительское
+        self.window.title("Список врачей")
+
+        self.listbox = tk.Listbox(self.window, width=60, height=20)
+        self.listbox.pack(pady=10)
+
+        self.update_button = tk.Button(self.window, text="Обновить", command=self.update_list)
+        self.update_button.pack(pady=5)
+        self.combo_sort = ttk.Combobox(self.window, values=["Sort by Id", "Sort by Name","Sort by Spetialization","Sort by Cabinet"])
+        self.combo_sort.bind("<<ComboboxSelected>>", self.on_sort_selected)
+        self.combo_sort.pack(pady=5)
+        self.delete_button = tk.Button(self.window, text="Удалить", command=self.delete_doctor)
+        self.delete_button.pack(pady=5)
+
+        self.close_button = tk.Button(self.window, text="Закрыть", command=self.window.destroy)
+        self.close_button.pack(pady=5)
+
+        self.update_list()  # Изначально обновляем список при открытии окна
+
+    def delete_doctor(self):
+        selected_doctor = self.get_selected_doctor()
+        if selected_doctor:
+            if messagebox.askyesno("Подтверждение", "Вы уверены, что хотите удалить этого врача?"):
+                self.controller.delete_doctor(selected_doctor)
+                self.update_list()
+
+    def get_selected_doctor(self):
+        selected_indices = self.listbox.curselection()
+        if selected_indices:
+            selected_index = selected_indices[0]
+            doctor_data = self.listbox.get(selected_index).split(", ")
+            return {
+                'name': doctor_data[0],
+                'spetialization': doctor_data[1],
+                'cabinet': doctor_data[2]
+            }
+        else:
+            return None
+    def on_sort_selected(self, event):
+        """Обрабатывает выбор сортировки и обновляет список."""
+        selected = self.combo_sort.get()
+        doctors = self.controller.get_doctors()  # Получаем текущий список пациентов
+        sorted_doctors = self.controller.sort_doctors(doctors, selected)  # Сортируем пациентов
+        self.update_list(sorted_doctors)  # Обновляем отображение
+
+    def update_list(self, doctors=None):
+
+        self.listbox.delete(0, tk.END)  # Очищаем текущий список
+        if doctors is None:
+            doctors = self.controller.get_doctors()  # Получаем текущий список пациентов, если не передан аргумент
+
+        if not doctors:
+            messagebox.showinfo("Информация", "Нет доступных пациентов.")
+        else:
+            for doctor in doctors:
+                self.listbox.insert(tk.END,
+                                    f"{doctor[0]}, {doctor[1]}, {doctor[2]}, {doctor[3]}")
+class ServiceView:
+    def __init__(self,controller,main_controller):
+        self.controller = controller
+        self.main_controller = main_controller  # Сохранение ссылки на контроллер главного окна
+
+        self.window = tk.Tk()
+        self.window.title("Добавить услугу")
+        self.window.geometry('400x350')
+
+        # Ввод данных услуги
+        self.name_entry = tk.Entry(self.window)
+        self.cost_entry = tk.Entry(self.window)
+
+        # Разметка полей ввода и кнопок
+        tk.Label(self.window, text="Имя").pack(pady=10)
+        self.name_entry.pack()
+        tk.Label(self.window, text="Стоимость").pack()
+        self.cost_entry.pack()
+
+        tk.Button(self.window, text="Добавить", command=self.add_service).pack(pady=20)
+        tk.Button(self.window, text="Назад", command=self.go_back).pack()
+    def go_back(self):
+        self.window.destroy()
+        self.main_controller.go_back_to_main()
+    def add_service(self):
+        name= self.name_entry.get(),
+        cost=self.cost_entry.get(),
+
+        self.controller.add_service(name,cost)
+
+        self.clear_entries()
+
+    def clear_entries(self):
+        self.name_entry.delete(0, tk.END)
+        self.cost_entry.delete(0, tk.END)
+
+    def run(self):
+        self.window.mainloop()
+class ServiceListView:
+    def __init__(self, controller, main_controller):
+        self.controller = controller
+        self.main_controller = main_controller
+        self.window = tk.Toplevel(main_controller.main_view.window)  # Используем основное окно как родительское
+        self.window.title("Список услуг")
+
+        self.listbox = tk.Listbox(self.window, width=60, height=20)
+        self.listbox.pack(pady=10)
+
+        self.update_button = tk.Button(self.window, text="Обновить", command=self.update_list)
+        self.update_button.pack(pady=5)
+        self.combo_sort = ttk.Combobox(self.window, values=["Sort by Id", "Sort by Name", "Sort by Cost"])
+        self.combo_sort.bind("<<ComboboxSelected>>", self.on_sort_selected)
+        self.combo_sort.pack(pady=5)
+        self.delete_button = tk.Button(self.window, text="Удалить", command=self.delete_service)
+        self.delete_button.pack(pady=5)
+
+        self.close_button = tk.Button(self.window, text="Закрыть", command=self.window.destroy)
+        self.close_button.pack(pady=5)
+
+        self.update_list()  # Изначально обновляем список при открытии окна
+
+    def delete_service(self):
+        selected_service = self.get_selected_service()
+        if selected_service:
+            if messagebox.askyesno("Подтверждение", "Вы уверены, что хотите удалить эту услугу?"):
+                self.controller.delete_service(selected_service)
+                self.update_list()
+
+    def get_selected_service(self):
+        selected_indices = self.listbox.curselection()
+        if selected_indices:
+            selected_index = selected_indices[0]
+            service_data = self.listbox.get(selected_index).split(", ")
+            return {
+                'name': service_data[0],
+                'cost': service_data[1],
+            }
+        else:
+            return None
+
+    def on_sort_selected(self, event):
+        """Обрабатывает выбор сортировки и обновляет список."""
+        selected = self.combo_sort.get()
+        services = self.controller.get_services()
+        sorted_services = self.controller.sort_services(services, selected)
+        self.update_list(sorted_services)
+
+    def update_list(self,services=None):
+
+        self.listbox.delete(0, tk.END)  # Очищаем текущий список
+        if services is None:
+            services = self.controller.get_services()  # Получаем текущий список пациентов, если не передан аргумент
+
+        if not services:
+            messagebox.showinfo("Информация", "Нет доступных пациентов.")
+        else:
+            for service in services:
+                self.listbox.insert(tk.END,
+                                    f"{service[0]}, {service[1]}, {service[2]}")
+
+class AppointmentView:
+    def __init__(self,controller,main_controller):
+        self.controller = controller
+        self.main_controller = main_controller  # Сохранение ссылки на контроллер главного окна
+
+        self.window = tk.Tk()
+        self.window.title("Добавить запись")
+        self.window.geometry('400x350')
+
+        # Ввод данных услуги
+        self.patient_id_entry = tk.Entry(self.window)
+        self.doctor_id_entry = tk.Entry(self.window)
+        self.date_entry = tk.Entry(self.window)
+        self.service_id_entry = tk.Entry(self.window)
+
+        # Разметка полей ввода и кнопок
+        tk.Label(self.window, text="ID пациента").pack(pady=10)
+        self.patient_id_entry.pack()
+        tk.Label(self.window, text="ID врача").pack()
+        self.doctor_id_entry.pack()
+        tk.Label(self.window, text="Дата и время (YYYY-MM-DD HH:MM:SS)").pack()
+        self.date_entry.pack()
+        tk.Label(self.window, text="ID услуги").pack()
+        self.service_id_entry.pack()
+
+        tk.Button(self.window, text="Добавить", command=self.add_app).pack(pady=20)
+        tk.Button(self.window, text="Назад", command=self.go_back).pack()
+
+    def add_app(self):
+        patient_id = int(self.patient_id_entry.get())
+        doctor_id = int(self.doctor_id_entry.get())
+        appointment_date = self.date_entry.get()
+        service_id = self.service_id_entry.get()
+        service_id = int(service_id) if service_id else None  # Преобразуем в int, если не пусто
+
+                # Добавляем прием через контроллер
+        self.controller.add_app(patient_id, doctor_id, appointment_date, service_id)
+
+        self.clear_entries()
+
+    def go_back(self):
+        self.window.destroy()
+        self.main_controller.go_back_to_main()
+    def clear_entries(self):
+        self.patient_id_entry.delete(0, tk.END)
+        self.doctor_id_entry.delete(0, tk.END)
+        self.date_entry.delete(0, tk.END)
+        self.service_id_entry.delete(0, tk.END)
+
+    def run(self):
+        self.window.mainloop()
+
+class AppointmentListView:
+    def __init__(self,controller,main_controller):
+        self.controller = controller
+        self.main_controller = main_controller  # Сохранение ссылки на контроллер главного окна
+        self.window = tk.Tk()
+        self.window.title("Все записи")
+        self.listbox = tk.Listbox(self.window, width=60, height=20)
+        self.listbox.pack(pady=10)
+
+
+
+        self.update_button = tk.Button(self.window, text="Обновить", command=self.update_list)
+        self.update_button.pack(pady=5)
+        self.combo_sort = ttk.Combobox(self.window,
+                                       values=["Sort by Id", "Sort by Name", "Sort by Doctor", "Sort by Date",
+                                               "Sort by Service"])
+        self.combo_sort.bind("<<ComboboxSelected>>", self.on_sort_selected)
+        self.combo_sort.pack(pady=5)
+        self.delete_button = tk.Button(self.window, text="Удалить", command=self.delete_app)
+        self.delete_button.pack(pady=5)
+
+        self.close_button = tk.Button(self.window, text="Закрыть", command=self.window.destroy)
+        self.close_button.pack(pady=5)
+
+
+
+    def delete_app(self):
+        selected_app = self.get_selected_app()
+        if selected_app:
+            if messagebox.askyesno("Подтверждение", "Вы уверены, что хотите удалить эту запись?"):
+                self.controller.delete_app(selected_app)
+                self.update_list()
+
+    def get_selected_app(self):
+        selected_indices = self.listbox.curselection()
+        if selected_indices:
+            selected_index = selected_indices[0]
+            app_data = self.listbox.get(selected_index).split(", ")
+            return {
+                 'patient_id': app_data[0],
+                    'doctor_id': app_data[1],
+                    'appointment_date': app_data[2],
+                    'service_id': app_data[3]
+            }
+        else:
+            return None
+    def on_sort_selected(self, event):
+        """Обрабатывает выбор сортировки и обновляет список."""
+        selected = self.combo_sort.get()
+        apps = self.controller.get_apps()
+        sorted_apps = self.controller.sort_apps(apps, selected)
+        self.update_list(sorted_apps)
+
+    def update_list(self, apps=None):
+        self.listbox.delete(0, tk.END)  # Очищаем текущий список
+        if apps is None:
+            apps = self.controller.get_apps()  # Получаем текущий список пациентов, если не передан аргумент
+
+        if not apps:
+            messagebox.showinfo("Информация", "Нет доступных пациентов.")
+        else:
+            for app in apps:
+                 self.listbox.insert(tk.END,
+                                    f"{app[0]}, {app[1]}, {app[2]},{app[3]},{app[4]}")
+
+
