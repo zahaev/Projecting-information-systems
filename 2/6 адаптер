@@ -16,33 +16,33 @@ class Patients_DB:
         except Exception as e:
             print(f"Error connecting to database: {e}")
 
-    # a. Чтение всех значений из файла (реализуется в потомках)
+    # a.  (реализуется в потомках)
     def read_all(self):
         raise NotImplementedError("This method should be overridden in the subclass")
 
-    # b. Запись всех значений в файл (реализуется в потомках)
+    # b.  (реализуется в потомках)
     def write_all(self):
         raise NotImplementedError("This method should be overridden in the subclass")
 
-    # c. Получить объект по ID
+    # c.
     def get_by_id(self, patient_id):
         for patient in self._data:
             if patient['PatientID'] == patient_id:
                 return patient
         return None
 
-    # d. Получить список n по счету k объектов класса short
+    # d.
     def get_k_n_short_list(self, k, n):
         start_index = (k - 1) * n
         end_index = start_index + n
         return self._data[start_index:end_index]
 
-    # e. Сортировать элементы по выбранному полю (по умолчанию по фамилии)
+    # e. 
     def sort_by_field(self, field_name='Name'):
         self._data.sort(key=lambda x: x.get(field_name, ''))
         self.write_all()
 
-    # f. Добавить объект в список (при добавлении сформировать новый ID)
+    # f. 
     def add_patient(self, name, date_of_birth, email, address, phone):
         new_id = max([patient['PatientID'] for patient in self._data], default=0) + 1
         new_patient = {
@@ -56,7 +56,7 @@ class Patients_DB:
         self._data.append(new_patient)
         self.write_all()
 
-    # g. Заменить элемент списка по ID
+    # g. 
     def update_patient_by_id(self, patient_id, name=None, date_of_birth=None, email=None, address=None, phone=None):
         patient = self.get_by_id(patient_id)
         if patient:
@@ -74,7 +74,7 @@ class Patients_DB:
             return True
         return False
 
-    # h. Удалить элемент списка по ID
+    # h. 
     def delete_patient_by_id(self, patient_id):
         patient = self.get_by_id(patient_id)
         if patient:
@@ -83,7 +83,7 @@ class Patients_DB:
             return True
         return False
 
-    # i. Получить количество элементов
+    # i. 
     def get_count(self):
         return len(self._data)
 
