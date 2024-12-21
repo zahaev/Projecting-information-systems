@@ -10,20 +10,20 @@ class Patients_DB:
         )
         self.cursor = self.conn.cursor(dictionary=True)  # Используем словарь для удобства
 
-    # a. Получить объект по ID
+    # a.
     def get_by_id(self, patient_id):
         query = "SELECT * FROM Patients WHERE PatientID = %s"
         self.cursor.execute(query, (patient_id,))
         return self.cursor.fetchone()
 
-    # b. Получить список n по счету k объектов класса short
+    # b. 
     def get_k_n_short_list(self, k, n):
         offset = (k - 1) * n
         query = "SELECT * FROM Patients LIMIT %s OFFSET %s"
         self.cursor.execute(query, (n, offset))
         return self.cursor.fetchall()
 
-    # c. Добавить объект в список (при добавлении сформировать новый ID)
+    # c. 
 
     def add_patient(self, name, date_of_birth, email, address, phone):
         query = "INSERT INTO Patients (Name, Date_of_birth, Email, Address, Phone) VALUES (%s, %s, %s, %s, %s)"
@@ -31,7 +31,7 @@ class Patients_DB:
         self.conn.commit()
         return self.cursor.lastrowid
 
-    # d. Заменить элемент списка по ID
+    # d. 
     def update_patient_by_id(self, patient_id, name=None, date_of_birth=None, email=None, address=None, phone=None):
         client = self.get_by_id(patient_id)
         if client:
@@ -49,14 +49,14 @@ class Patients_DB:
             return True
         return False
 
-    # e. Удалить элемент списка по ID
+    # e. 
     def delete_patient_by_id(self, patient_id):
         query = "DELETE FROM Patients WHERE PatientID = %s"
         self.cursor.execute(query, (patient_id,))
         self.conn.commit()
         return self.cursor.rowcount > 0
 
-    # f. Получить количество элементов
+    # f. 
     def get_count(self):
         query = "SELECT COUNT(*) as count FROM Patients"
         self.cursor.execute(query)
