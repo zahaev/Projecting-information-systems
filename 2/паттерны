@@ -36,27 +36,27 @@ class MyEntity_rep_DB:
     def __init__(self, db):
         self.db = db  # Передаем экземпляр синглтона Database
 
-    # a. Получить объект по ID
+    # a. 
     def get_by_id(self, client_id):
         query = "SELECT * FROM Clients WHERE ClientID = %s"
         cursor = self.db.execute_query(query, (client_id,))
         return cursor.fetchone()
 
-    # b. Получить список n по счету k объектов класса short
+    # b. 
     def get_k_n_short_list(self, k, n):
         offset = (k - 1) * n
         query = "SELECT * FROM Clients LIMIT %s OFFSET %s"
         cursor = self.db.execute_query(query, (n, offset))
         return cursor.fetchall()
 
-    # c. Добавить объект в список (при добавлении сформировать новый ID)
+    # c. 
     def add_client(self, last_name, first_name, middle_name, address, phone):
         query = "INSERT INTO Clients (LastName, FirstName, MiddleName, Address, Phone) VALUES (%s, %s, %s, %s, %s)"
         self.db.execute_query(query, (last_name, first_name, middle_name, address, phone))
         self.db.commit()
         return self.db.cursor.lastrowid  # Возвращаем ID добавленного клиента
 
-    # d. Заменить элемент списка по ID
+    # d. 
     def update_client_by_id(self, client_id, last_name=None, first_name=None, middle_name=None, address=None, phone=None):
         client = self.get_by_id(client_id)
         if client:
@@ -74,14 +74,14 @@ class MyEntity_rep_DB:
             return True
         return False
 
-    # e. Удалить элемент списка по ID
+    # e. 
     def delete_client_by_id(self, client_id):
         query = "DELETE FROM Clients WHERE ClientID = %s"
         self.db.execute_query(query, (client_id,))
         self.db.commit()
         return self.db.cursor.rowcount > 0  # Возвращаем True, если удаление было успешным
 
-    # f. Получить количество элементов
+    # f. 
     def get_count(self):
         query = "SELECT COUNT(*) as count FROM Clients"
         cursor = self.db.execute_query(query)
